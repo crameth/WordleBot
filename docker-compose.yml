@@ -1,0 +1,8 @@
+services:
+  wordlebot:
+    container_name: wordlebot
+    build:
+      context: .
+    env_file:
+      - .env
+    restart: unless-stopped
