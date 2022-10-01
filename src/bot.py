@@ -26,7 +26,6 @@ async def on_message(message):
 
     # filter messages by the channel we are monitoring, then ensure it starts with the proper substring
     if message.channel.id == MONITOR_CHANNEL_ID and message.content.startswith('Wordle '):
-        print("Wordle score detected in monitored channel")
         # check if user has appropriate role to post wordle scores
         verified_role = discord.utils.find(lambda r: r.name == WORDLE_ROLE_NAME, message.guild.roles)
         if verified_role in message.author.roles:
@@ -41,7 +40,7 @@ async def on_message(message):
                 user_series = int(user_result[1])
                 user_score = user_result[2].split('/')[0]
             except:
-                await.message.channel.send(f'Your score is invalid. Sorry :(')
+                await message.channel.send(f'Your score is invalid. Sorry :(')
                 return
 
             # calculate score
