@@ -1,6 +1,6 @@
 # bot.py
 import os
-import re 
+import operator
 
 import discord
 from dotenv import load_dotenv
@@ -88,5 +88,33 @@ async def on_message(message):
             # catch-all for when score is not posted for whatever reason
             await message.channel.send(f'Your score is invalid. Sorry :(')
             return
+    elif message.channel.id == MONITOR_CHANNEL_ID and message.content == ('!wordle-lb'):
+        channel = client.get_channel(LEADERBOARD_CHANNEL_ID)
+        records = [m async for m in channel.history(limit=365)]
+
+        # calculate total scores for each person
+        user_scores = {}
+        for r in records:
+            if r.content.startswith(f'**'):
+                # check if user score is already submitted for that particular series
+                scores = r.content.split('\n')[1:]
+
+                for s in scores:
+                    user_id = s.split(' ')[0]
+                    score = int(s.split(' ')[1][2:3])
+                    if user_id in user_scores.keys():
+                        user_scores[user_id]["score"] = user_scores[user_id]["score"] + score
+                        user_scores[user_id]["count"] = user_scores[user_id]["count"] + 1
+                    else:
+                        user_scores[user_id] = {"score": score, "count": 1}
+
+        user_scores = {k: v for k, v in sorted(user_scores.items(), key=lambda item: item[1]["score"], reverse=True)}
+        
+        user_scores_str = "**Leaderboard**\n"
+        for i, (k, v) in enumerate(user_scores.items()):
+            user_scores_str = user_scores_str + f'{i+1}. {k} `{v["score"]}` ({round(v["score"]/v["count"],2)})\n'
+        
+        await message.channel.send(f'{user_scores_str}')
+        return
 
 client.run(TOKEN)

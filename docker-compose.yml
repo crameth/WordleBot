@@ -1,5 +1,6 @@
 services:
   wordlebot:
+    image: wordlebot:latest
     container_name: wordlebot
     build:
       context: .
